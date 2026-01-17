@@ -1,5 +1,5 @@
 import { pool } from '../../config/database';
-import { CreateAlertDTO, AlertRecord, AlertFilters, Pagination } from './types';
+import { CreateAlertDTO, AlertRecord, AlertFilters, Pagination, ActiveAlert } from './types';
 
 export class AlertRepository {
 
@@ -53,22 +53,30 @@ export class AlertRepository {
    */
   static async list(
     filters: AlertFilters,
-    pagination: Pagination
+    pagination?: Pagination
   ): Promise<AlertRecord[]> {
     const values: any[] = [];
 
     const whereClause = this.buildWhereClause(filters, values);
 
-    const query = `
+    let query = `
       SELECT *
       FROM alerts
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT $${values.length + 1}
-      OFFSET $${values.length + 2}
-    `;
+      ${whereClause}`;
 
-    values.push(pagination.limit, pagination.offset);
+    if (filters.orderBy) {
+      query += ` ORDER BY ${filters.orderBy} ${filters.direction}`;
+    }
+
+    if (pagination?.limit) {
+      query += ` LIMIT $${values.length + 1}`;
+      values.push(pagination.limit);
+
+      if (pagination.offset !== undefined) {
+        query += ` OFFSET $${values.length + 1}`;
+        values.push(pagination.offset);
+      }
+    }
 
     const { rows } = await pool.query<AlertRecord>(query, values);
     return rows;
@@ -109,5 +117,33 @@ export class AlertRepository {
 
     const { rows } = await pool.query<AlertRecord>(query, [id]);
     return rows[0] ?? null;
+  }
+
+  /**
+   * Mark alert as TRIGGERED
+   */
+  static async markAsTriggered(alertId: string): Promise<void> {
+    const query = `
+      UPDATE alerts
+      SET status = 'TRIGGERED',
+          triggered_at = NOW()
+      WHERE id = $1
+    `;
+
+    await pool.query(query, [alertId]);
+  }
+
+  /**
+   * Fetch all ACTIVE alerts
+   */
+  static async listActiveAlerts(): Promise<ActiveAlert[]> {
+    const query = `
+      SELECT id, coin_id, target_price, condition
+      FROM alerts
+      WHERE status = 'ACTIVE'
+    `;
+
+    const { rows } = await pool.query<ActiveAlert>(query);
+    return rows;
   }
 }

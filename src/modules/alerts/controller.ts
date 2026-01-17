@@ -72,9 +72,9 @@ export const listAlertsWithFilter = async (
     try {
 
         let defLimit = 10;
-        const { page, limit, userId, status } = req.body as Partial<ListValidationType>;
+        const { page, limit, userId, status, orderBy, direction } = req.body as Partial<ListValidationType>;
 
-        const validationError = validateListAlert({ page, limit, userId, status });
+        const validationError = validateListAlert({ page, limit, userId, status, orderBy, direction });
 
         if (validationError) {
             return sendError(res, validationError, null, 400);

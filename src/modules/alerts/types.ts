@@ -20,7 +20,9 @@ export type ListValidationType = {
   page: number;
   limit: number;
   userId: string;
-  status: 'ACTIVE' | 'TRIGGERED'
+  status: 'ACTIVE' | 'TRIGGERED';
+  orderBy: string;
+  direction: 'ASC' | 'DESC';
 };
 
 export type PaginationParamsType = {
@@ -31,9 +33,18 @@ export type PaginationParamsType = {
 export type AlertFilters = {
   userId?: string;
   status?: 'ACTIVE' | 'TRIGGERED';
+  orderBy?: string;
+  direction?: 'ASC' | 'DESC';
 };
 
 export type Pagination = {
   limit: number;
   offset: number;
+};
+
+export type ActiveAlert = {
+  id: string;
+  coin_id: string;
+  target_price: string;
+  condition: 'ABOVE' | 'BELOW';
 };

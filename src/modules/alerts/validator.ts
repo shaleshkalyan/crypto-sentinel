@@ -60,8 +60,16 @@ export const validateListAlert = (
         throw new Error('User Id is invalid');
     }
 
-    if (!payload.status || typeof payload.status !== 'string' || payload.status !== "ACTIVE") {
+    if (!payload.status || !['ACTIVE', 'TRIGGERED'].includes(payload.status)) {
         throw new Error('Invalid status for alert list found.');
+    }
+
+    if (!payload.orderBy || typeof payload.orderBy !== 'string') {
+        throw new Error('Invalid column sorting for alert list.');
+    }
+
+    if (!payload.direction || !['ASC', 'DESC'].includes(payload.direction)) {
+        throw new Error('Invalid direction for alert list.');
     }
 
     return null;

@@ -12,7 +12,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "worker": "node dist/workers/priceMonitor.worker.js",
+    "queues": "tsx src/workers/monitoring.worker.ts",
+    "worker": "node dist/workers/monitoring.worker.js",
     "migrate": "tsx src/migrations/migrate.ts"
   },
   "dependencies": {
