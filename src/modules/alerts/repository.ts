@@ -2,7 +2,7 @@ import { pool } from '../../config/database';
 import { CreateAlertDTO, AlertRecord, AlertFilters, Pagination } from './types';
 
 export class AlertRepository {
-  
+
   /**
    * Function to insert data in alerts table.
    */
@@ -94,5 +94,20 @@ export class AlertRepository {
     );
 
     return Number(rows[0].count);
+  }
+
+  /**
+   * Delete alert by id
+   * Returns deleted record or null if not found
+   */
+  static async deleteById(id: string): Promise<AlertRecord | null> {
+    const query = `
+      DELETE FROM alerts
+      WHERE id = $1
+      RETURNING *
+    `;
+
+    const { rows } = await pool.query<AlertRecord>(query, [id]);
+    return rows[0] ?? null;
   }
 }

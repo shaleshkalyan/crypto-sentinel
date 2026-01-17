@@ -41,3 +41,12 @@ export const sendError = <E = unknown>(
  */
 export const isValidCondition = (value: unknown): value is 'ABOVE' | 'BELOW' =>
 value === 'ABOVE' || value === 'BELOW';
+
+/**
+ * Utility guard for unique id.
+ */
+export const isValidUUID = (value: string): boolean => {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value
+  );
+};

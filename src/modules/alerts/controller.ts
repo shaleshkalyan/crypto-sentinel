@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { AlertRepository } from './repository';
 import { CreateAlertDTO, ListValidationType, PaginationParamsType } from './types';
 import { sendSuccess, sendError } from '../../libs/utils';
-import { parsePagination, validateCreateAlert, validateListAlert } from './validator';
+import { validatePagination, validateAlertId, validateCreateAlert, validateListAlert } from './validator';
 
 /**
  * Create a new price alert
@@ -32,7 +32,7 @@ export const listAlert = async (req: Request, res: Response) => {
         let defLimit = 10;
         const { page, limit } = req.query as Partial<PaginationParamsType>;
 
-        const validationError = parsePagination(page, limit);
+        const validationError = validatePagination(page, limit);
 
         if (validationError) {
             return sendError(res, validationError, null, 400);
@@ -104,5 +104,30 @@ export const listAlertsWithFilter = async (
         });
     } catch (error: any) {
         return sendError(res, error.message, null, 400);
+    }
+};
+
+/**
+ * DELETE alerts based on id.
+ */
+export const deleteAlert = async (req: Request, res: Response) => {
+    try {
+        const validationError = validateAlertId(req.params.id);
+        if (validationError) {
+            return sendError(res, validationError, null, 400);
+        }
+
+        const deleted = await AlertRepository.deleteById(String(req.params.id));
+
+        if (!deleted) {
+            return sendError(res, 'Alert not found', null, 404);
+        }
+
+        return sendSuccess(res, 'Alert deleted successfully', {
+            deleted: true,
+            id: deleted.id,
+        });
+    } catch (error: any) {
+        return sendError(res, 'Failed to delete alert', error);
     }
 };

@@ -1,3 +1,4 @@
+import { isValidUUID } from '../../libs/utils';
 import { CreateAlertDTO, ListValidationType, PaginationParamsType } from './types';
 
 /**
@@ -55,8 +56,8 @@ export const validateListAlert = (
         throw new Error('Limit cannot exceed 100');
     }
 
-    if (!payload.userId) {
-        throw new Error('Invalid status for alert list found.');
+    if (!payload.userId || typeof payload.userId !== 'string') {
+        throw new Error('User Id is invalid');
     }
 
     if (!payload.status || typeof payload.status !== 'string' || payload.status !== "ACTIVE") {
@@ -69,7 +70,7 @@ export const validateListAlert = (
 /**
  * Validate get alert list for pagination.
  */
-export const parsePagination = (
+export const validatePagination = (
     page?: unknown,
     limit?: unknown
 ): null => {
@@ -88,3 +89,18 @@ export const parsePagination = (
 
     return null;
 };
+
+/**
+ * Validate alert id.
+ */
+export const validateAlertId = (id: unknown): null => {
+    if (!id || typeof id !== 'string') {
+        throw new Error('Alert id is required');
+    }
+
+    if (!isValidUUID(id)) {
+        throw new Error('Invalid alert id format');
+    }
+    return null;
+};
+
