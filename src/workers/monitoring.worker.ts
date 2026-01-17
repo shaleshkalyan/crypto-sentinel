@@ -1,49 +1,24 @@
 import 'dotenv/config';
-import { AlertRepository } from '../modules/alerts/repository';
-import { getUsdPrices } from '../external/coingecko/service';
+import { AlertService } from '../services/alert.service';
 import { config } from '../config/constants';
 
+const POLL_INTERVAL_MS =
+    Number(config.PUBLIC_RATE_LIMITING) * 60 * 1000;
 
-const POLL_INTERVAL_MS = Number(config.PUBLIC_RATE_LIMITING) * 60 * 1000;
+const startPriceMonitor = async () => {
+    console.log(
+        `Price monitoring started (every ${config.PUBLIC_RATE_LIMITING} minutes)...`
+    );
 
-const runPriceMonitor = async () => {
-    try {
-        console.log('Loading active alerts...');
+    await AlertService.processActiveAlerts();
 
-        const alerts = await AlertRepository.listActiveAlerts();
-
-        if (alerts.length === 0) {
-            console.log('No active alerts');
-            return;
+    setInterval(async () => {
+        try {
+            await AlertService.processActiveAlerts();
+        } catch (error) {
+            console.error('Worker execution failed:', error);
         }
-
-        const coinIds = [...new Set(alerts.map(alert => alert.coin_id))];
-
-        const prices = await getUsdPrices(coinIds);
-
-        for (const alert of alerts) {
-            const currentPrice = prices[alert.coin_id]?.usd;
-
-            if (currentPrice === undefined || currentPrice === null) continue;
-
-            const targetPrice = Number(alert.target_price);
-
-            const conditions: Record<string, boolean> = {
-                'ABOVE': currentPrice > targetPrice,
-                'BELOW': currentPrice < targetPrice
-            };
-
-            if (conditions[alert.condition]) {
-                console.log(`ALERT TRIGGERED: ${alert.coin_id} (${alert.condition}) | Current: ${currentPrice} | Target: ${targetPrice}`);
-
-                await AlertRepository.markAsTriggered(alert.id);
-            }
-        }
-    } catch (error) {
-        console.error('Price monitor error:', error);
-    }
+    }, POLL_INTERVAL_MS);
 };
 
-setInterval(runPriceMonitor, POLL_INTERVAL_MS);
-
-runPriceMonitor();
+startPriceMonitor();

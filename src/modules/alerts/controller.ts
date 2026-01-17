@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AlertRepository } from './repository';
+import { AlertService } from '../../services/alert.service';
 import { CreateAlertDTO, ListValidationType, PaginationParamsType } from './types';
 import { sendSuccess, sendError } from '../../libs/utils';
 import { validatePagination, validateAlertId, validateCreateAlert, validateListAlert } from './validator';
@@ -16,9 +16,16 @@ export const createAlert = async (req: Request, res: Response) => {
             return sendError(res, validationError, null, 400);
         }
 
-        const alert = await AlertRepository.create(body as CreateAlertDTO);
+        const alert = await AlertService.createAlert(
+            body as CreateAlertDTO
+        );
 
-        return sendSuccess(res, 'Alert created successfully', alert, 201);
+        return sendSuccess(
+            res,
+            'Alert created successfully',
+            alert,
+            201
+        );
     } catch (error) {
         return sendError(res, 'Failed to create alert', error);
     }
@@ -29,33 +36,22 @@ export const createAlert = async (req: Request, res: Response) => {
  */
 export const listAlert = async (req: Request, res: Response) => {
     try {
-        let defLimit = 10;
-        const { page, limit } = req.query as Partial<PaginationParamsType>;
+        const { page, limit } =
+            req.query as Partial<PaginationParamsType>;
 
         const validationError = validatePagination(page, limit);
-
         if (validationError) {
             return sendError(res, validationError, null, 400);
         }
-        if (limit) {
-            defLimit = limit;
-        }
 
-        const offset = (Number(page) - 1) * defLimit;
-
-        const [alerts, total] = await Promise.all([
-            AlertRepository.list({}, { limit: defLimit, offset }),
-            AlertRepository.count({}),
-        ]);
+        const result = await AlertService.listAlerts({
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 10,
+        });
 
         return sendSuccess(res, 'Alerts fetched successfully', {
-            data: alerts,
-            meta: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / defLimit),
-            },
+            data: result.alerts,
+            meta: result.meta,
         });
     } catch (error: any) {
         return sendError(res, error.message, null, 400);
@@ -70,37 +66,21 @@ export const listAlertsWithFilter = async (
     res: Response
 ) => {
     try {
+        const body = req.body as Partial<ListValidationType>;
 
-        let defLimit = 10;
-        const { page, limit, userId, status, orderBy, direction } = req.body as Partial<ListValidationType>;
-
-        const validationError = validateListAlert({ page, limit, userId, status, orderBy, direction });
-
+        const validationError = validateListAlert(body);
         if (validationError) {
             return sendError(res, validationError, null, 400);
         }
 
-        if (limit) {
-            defLimit = limit;
-        }
-
-        const offset = (Number(page) - 1) * defLimit;
-
-        const filters = { userId, status };
-
-        const [alerts, total] = await Promise.all([
-            AlertRepository.list(filters, { limit: defLimit, offset }),
-            AlertRepository.count(filters),
-        ]);
+        const result =
+            await AlertService.listAlertsWithFilter(
+                body as ListValidationType
+            );
 
         return sendSuccess(res, 'Alerts fetched successfully', {
-            data: alerts,
-            meta: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / defLimit),
-            },
+            data: result.alerts,
+            meta: result.meta,
         });
     } catch (error: any) {
         return sendError(res, error.message, null, 400);
@@ -117,17 +97,20 @@ export const deleteAlert = async (req: Request, res: Response) => {
             return sendError(res, validationError, null, 400);
         }
 
-        const deleted = await AlertRepository.deleteById(String(req.params.id));
-
-        if (!deleted) {
-            return sendError(res, 'Alert not found', null, 404);
-        }
+        const deleted = await AlertService.deleteAlert(
+            String(req.params.id)
+        );
 
         return sendSuccess(res, 'Alert deleted successfully', {
             deleted: true,
             id: deleted.id,
         });
     } catch (error: any) {
-        return sendError(res, 'Failed to delete alert', error);
+        return sendError(
+            res,
+            error.message || 'Failed to delete alert',
+            null,
+            error.message === 'Alert not found' ? 404 : 500
+        );
     }
 };
