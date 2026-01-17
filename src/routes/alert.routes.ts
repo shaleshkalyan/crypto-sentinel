@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { createAlert } from '../modules/alerts/controller';
+import { createAlert, listAlert, listAlertsWithFilter } from '../modules/alerts/controller';
 
 const router = Router();
 
 router.post('/alerts', createAlert);
+router.get('/alerts', listAlert)
+router.post('/alerts/search', listAlertsWithFilter);
 
 export default router;
