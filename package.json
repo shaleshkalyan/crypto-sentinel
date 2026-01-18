@@ -14,13 +14,14 @@
     "start": "node dist/server.js",
     "queues": "tsx src/workers/monitoring.worker.ts",
     "worker": "node dist/workers/monitoring.worker.js",
-    "migrate": "node dist/migrations/migrate.js",
-    "test" : "jest"
+    "migrate": "tsx src/migrations/migrate.ts",
+    "test": "jest"
   },
   "dependencies": {
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "pg": "^8.11.5"
   },
   "devDependencies": {
