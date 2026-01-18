@@ -14,7 +14,7 @@
     "start": "node dist/server.js",
     "queues": "tsx src/workers/monitoring.worker.ts",
     "worker": "node dist/workers/monitoring.worker.js",
-    "migrate": "tsx src/migrations/migrate.ts",
+    "migrate": "node dist/migrations/migrate.js",
     "test" : "jest"
   },
   "dependencies": {
