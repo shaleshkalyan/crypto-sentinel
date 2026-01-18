@@ -50,7 +50,7 @@ Crypto Sentinel is a Node.js (TypeScript) service that allows users to create cr
 
 ### Steps
 ```bash
-git clone https://github.com/shaleshkalyan/event-management-api.git
+git clone https://github.com/shaleshkalyan/crypto-sentinel.git
 cd crypto-sentinel
 npm install
 ```
