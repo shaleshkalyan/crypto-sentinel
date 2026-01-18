@@ -6,5 +6,6 @@ export const config = {
     "SERVICE_PORT" : process.env.SERVICE_PORT,
     "DEPLOYEMENT_ENV" : process.env.DEPLOYEMENT_ENV,
     "PUBLIC_RATE_LIMITING" : process.env.PUBLIC_RATE_LIMITING,
-    "CRYPTO_API_TOKEN" : process.env.COINGECKO_API_TOKEN
+    "CRYPTO_API_TOKEN" : process.env.COINGECKO_API_TOKEN,
+    "API_KEY" : process.env.API_KEY
 }
