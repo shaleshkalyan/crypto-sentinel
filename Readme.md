@@ -53,7 +53,7 @@ Crypto Sentinel is a Node.js (TypeScript) service that allows users to create cr
 git clone https://github.com/shaleshkalyan/event-management-api.git
 cd crypto-sentinel
 npm install
-
+```
 ## Environment Variables
 
 ```env
@@ -63,7 +63,7 @@ DEPLOYEMENT_ENV=''
 PUBLIC_RATE_LIMITING=''
 COINGECKO_API_TOKEN=''
 API_KEY=''
-
+```
 ## Start Commands
 
 ```bash
